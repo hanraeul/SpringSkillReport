@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
@@ -22,6 +23,9 @@ public class UserService {
 
     // ADMIN_TOKEN
     private final String ADMIN_TOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
+
+    // 정규 표현식 패턴
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,15}$");
 
     public void signup(SignupRequestDto requestDto) {
         String username = requestDto.getUsername();
@@ -38,6 +42,13 @@ public class UserService {
         Optional<User> checkEmail = userRepository.findByEmail(email);
         if (checkEmail.isPresent()) {
             throw new IllegalArgumentException("중복된 Email 입니다.");
+        }
+
+
+
+        // password 형식 확인
+        if (!PASSWORD_PATTERN.matcher(password).matches()) {
+            throw new IllegalArgumentException("비밀번호는 최소 8자 이상, 15자 이하이며 알파벳 대소문자(a~z, A~Z), 숫자(0~9)로 구성되어야 합니다.");
         }
 
         // 사용자 ROLE 확인
