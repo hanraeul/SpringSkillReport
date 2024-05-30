@@ -25,11 +25,12 @@ public class UserService {
     private final String ADMIN_TOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
 
     // 정규 표현식 패턴
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-z0-9]{4,10}$");
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,15}$");
 
     public void signup(SignupRequestDto requestDto) {
         String username = requestDto.getUsername();
-        String password = passwordEncoder.encode(requestDto.getPassword());
+        String password = requestDto.getPassword();
 
         // 회원 중복 확인
         Optional<User> checkUsername = userRepository.findByUsername(username);
@@ -44,12 +45,18 @@ public class UserService {
             throw new IllegalArgumentException("중복된 Email 입니다.");
         }
 
-
+        // username 형식 확인
+        if (!USERNAME_PATTERN.matcher(username).matches()) {
+            throw new IllegalArgumentException("username은 최소 4자 이상, 10자 이하이며 알파벳 소문자(a~z), 숫자(0~9)로 구성되어야 합니다.");
+        }
 
         // password 형식 확인
         if (!PASSWORD_PATTERN.matcher(password).matches()) {
             throw new IllegalArgumentException("비밀번호는 최소 8자 이상, 15자 이하이며 알파벳 대소문자(a~z, A~Z), 숫자(0~9)로 구성되어야 합니다.");
         }
+
+        String encodedPassword = passwordEncoder.encode(password);
+
 
         // 사용자 ROLE 확인
         UserRoleEnum role = UserRoleEnum.USER;
@@ -61,7 +68,7 @@ public class UserService {
         }
 
         // 사용자 등록
-        User user = new User(username, password, email, role);
+        User user = new User(username, encodedPassword, email, role);
         userRepository.save(user);
     }
 }

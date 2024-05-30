@@ -5,6 +5,7 @@ import com.sparta.springauth.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -27,7 +28,7 @@ public class UserController {
         return "signup";
     }
     @PostMapping("/user/signup")
-    public String signup(SignupRequestDto requestDto) {
+    public String signup(@RequestBody SignupRequestDto requestDto) {
         userService.signup(requestDto);
         return "redirect:/api/user/login-page";
     }
